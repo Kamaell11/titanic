@@ -4,6 +4,15 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objs as go
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+import joblib
+
 # Page config
 st.set_page_config(page_title="Titanic Model",
                    page_icon=":ship:",
@@ -46,6 +55,9 @@ df_selection = df.query(
 
     
 )
+
+
+
 
 # Load dataframe with filter selection
 st.dataframe(df_selection)
@@ -98,7 +110,7 @@ total_men = len(df_selection[df_selection["sex"] == "male"])
 
 total_fem = len(df_selection[df_selection["sex"] == "female"])
 
-left_column, middle_column, right_column = st.columns((1,3,1))
+left_column, right_column = st.columns((1,2))
 
 
 with left_column:
@@ -108,8 +120,29 @@ with left_column:
     st.subheader(total_men)
     st.subheader("Total Female: ")
     st.subheader(total_fem)
+    # Check missing values
+    missing_values = df.isnull().sum()
 
-with middle_column:
+    total_cells = np.product(df.shape)
+    total_missing = missing_values.sum()
+
+    # percent of data that is missing
+    if total_cells == 0:
+        missing_prec = 0
+    else:
+        missing_prec = int((total_missing/total_cells) * 100)
+
+
+    st.write(f'The number of empty columns in dataset: \n ')
+    
+    st.write(missing_values)
+    st.write(f'Missing data is: {missing_prec}%')
+
+
+
+    
+# with middle_column:
+with right_column:
     if 'age' not in df.columns:
         st.warning("The column 'age' does not exist in the dataframe")
     else:
@@ -177,24 +210,95 @@ with middle_column:
         # Viewing the graph in the Streamlit app
         st.plotly_chart(fig)
 
-with right_column:
-    # Check missing values
-    missing_values = df.isnull().sum()
+        # <=== Machine Learning ===>
+        
+        df = pd.read_csv('data/titanic.csv')
 
-    total_cells = np.product(df.shape)
-    total_missing = missing_values.sum()
+        #Cleaning data
 
-    # percent of data that is missing
-    if total_cells == 0:
-        missing_prec = 0
-    else:
-        missing_prec = int((total_missing/total_cells) * 100)
+        # fill_median
+        median = df['age'].median()
+        df['age'].fillna(median, inplace=True)
+        median = df['fare'].median()
+        df['fare'].fillna(median, inplace=True)
+        # most_common_value
+        most_common_value = df['embarked'].mode()[0]
+        df['embarked'].fillna(most_common_value, inplace=True)
+        # drop columns
+        df.drop('cabin', axis=1, inplace=True)
+        df.drop('boat', axis=1, inplace=True)
+        df.drop('body', axis=1, inplace=True)
+        df.drop('home_dest', axis=1, inplace=True)
+
+        # Chaning variables to binary
+        df['sex'] = pd.factorize(df['sex'])[0]
+        df['embarked'] = pd.factorize(df['embarked'])[0]
+
+        # extraction of features and target variable
+        X = df.drop(['survived', 'name', 'ticket'], axis=1)
+        y = df['survived']
+
+        # Split data into training and test sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
-    st.write(f'The number of empty columns in dataset: \n ')
-    
-    st.write(missing_values)
-    st.write(f'Missing data is: {missing_prec}%')
-    
+        # Scale the features
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+
+        # Train multiple machine learning models
+        models = {'Logistic Regression': LogisticRegression(), 
+                'Random Forest': RandomForestClassifier(),
+                'Decision Tree': DecisionTreeClassifier(), 
+                'Support Vector Machine': SVC()}
+
+        best_model = None
+        best_accuracy = 0
+
+        for name, model in models.items():
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_model = model
+            st.write(f"{name} accuracy: {accuracy}")
+
+        # Save the best model
+        joblib.dump(best_model, 'best_model.pkl')
+
+        # <=== Prediction ===>
+
+        # Load the best model
+        best_model = joblib.load('best_model.pkl')
+
+                # Scale the features
+        scaler = StandardScaler()
+
+        # Get user input
+        age = st.number_input("Enter your age:", min_value=0, max_value=150, step=1)
+        sex = st.radio("Select your sex:", ['male', 'female'])
+        pclass = st.selectbox("Select your passenger class:", [1, 2, 3])
+        sibsp = st.number_input("Enter the number of siblings/spouses aboard:", min_value=0, max_value=10, step=1)
+        parch = st.number_input("Enter the number of parents/children aboard:", min_value=0, max_value=10, step=1)
+        fare = st.number_input("Enter the fare paid:", min_value=0.0, max_value=1000.0, step=1.0)
+        embarked = st.selectbox("Select the port of embarkation:", ['C', 'Q', 'S'])
+
+        # Preprocess the input data
+        data = {'age': age, 'sex': sex, 'pclass': pclass, 'sibsp': sibsp, 'parch': parch, 'fare': fare, 'embarked': embarked}
+        df = pd.DataFrame(data, index=[0])
+        df['sex'] = pd.factorize(df['sex'])[0]
+        df['embarked'] = pd.factorize(df['embarked'])[0]
+        df = df[['pclass', 'sex', 'age', 'sibsp', 'parch', 'fare', 'embarked']]
+        df = scaler.fit_transform(df)
+
+        # Make the prediction
+        prediction = best_model.predict(df)
+        if st.sidebar.button("See Yours chances to survive"):
+            if prediction[0] == 0:
+                st.write("Sorry, you did not survive the Titanic disaster.")
+            else:
+                st.write("Congratulations, you survived the Titanic disaster!")
 
     
