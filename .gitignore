@@ -2,3 +2,4 @@ main.py
 model.joblib
 functions.py
 best_model.pkl
+__pycache__

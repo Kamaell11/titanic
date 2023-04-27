@@ -40,7 +40,7 @@ git pull origin main
 Create your enviroment via Conda or Pip
 
 - Conda:
-    ```conda env create -f environment.yml```
+    ```conda create --name <env_name> --file requirements.txt```
 
 - Pip:
     ```pip install -r requirements.txt```
