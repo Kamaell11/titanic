@@ -1,44 +1,16 @@
-stages:
-  - build
-  - deploy
-
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
-build-job:
-  stage: build
-  image:
-    name: python:3.9
-    entrypoint: [""]
-  cache:
-    paths:
-      - .cache/pip
-  before_script:
-    - python -m venv .venv
-    - source .venv/bin/activate
+# The Docker image that will be used to build your app
+image: python
+# Functions that should be executed before the build script is run
+before_script:
+  - pip install -r requirements.txt
+pages:
   script:
-    - echo "Building the project..."
-    - pip install --upgrade pip
-    - pip install -r requirements.txt
-    - echo "Compile complete."
-
-deploy-job:
-  stage: deploy
-  environment: production
-  image:
-    name: python:3.9
-    entrypoint: [""]
-  cache:
-    paths:
-      - .cache/pip
-  before_script:
-    - python -m venv .venv
-    - source .venv/bin/activate
-    - pip install --upgrade pip
-    - pip install -r requirements.txt
-  script:
-    - echo "Deploying the project..."
     - streamlit run app.py
-    - echo "Application successfully deployed."
-    
-
+  artifacts:
+    paths:
+      # The folder that contains the files to be exposed at the Page URL
+      - public
+  rules:
+    # This ensures that only pushes to the default branch will trigger
+    # a pages deploy
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
