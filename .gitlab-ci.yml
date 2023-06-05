@@ -2,7 +2,7 @@
 image: python
 # Functions that should be executed before the build script is run
 before_script:
-  - "install:   - pip install -r requirements.txt"
+  - "before_script:   - pip install -r requirements.txt"
 pages:
   script:
     - streamlit run app.py
