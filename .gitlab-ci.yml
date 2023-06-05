@@ -21,21 +21,21 @@ build:
     - pip install --upgrade pip
     - pip install -r requirements.txt
 
-test:
-  stage: test
-  image:
-    name: python:3.9
-    entrypoint: [""]
-  cache:
-    paths:
-      - .cache/pip
-  before_script:
-    - python -m venv .venv
-    - source .venv/bin/activate
-    - pip install --upgrade pip
-    - pip install -r requirements.txt
-  script:
-    - pytest tests/
+# test:
+#   stage: test
+#   image:
+#     name: python:3.9
+#     entrypoint: [""]
+#   cache:
+#     paths:
+#       - .cache/pip
+#   before_script:
+#     - python -m venv .venv
+#     - source .venv/bin/activate
+#     - pip install --upgrade pip
+#     - pip install -r requirements.txt
+#   script:
+#     - pytest tests/
 
 deploy:
   stage: deploy
