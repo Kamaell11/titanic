@@ -1,5 +1,7 @@
 stages:
   - build
+  - test
+  - deploy
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -18,4 +20,31 @@ build:
   script:
     - pip install --upgrade pip
     - pip install -r requirements.txt
+
+test:
+  stage: test
+  image:
+    name: python:3.9
+    entrypoint: [""]
+  cache:
+    paths:
+      - .cache/pip
+  before_script:
+    - python -m venv .venv
+    - source .venv/bin/activate
+  script:
+    - pytest tests/
+
+deploy:
+  stage: deploy
+  image:
+    name: python:3.9
+    entrypoint: [""]
+  cache:
+    paths:
+      - .cache/pip
+  before_script:
+    - python -m venv .venv
+    - source .venv/bin/activate
+  script:
     - streamlit run app.py
