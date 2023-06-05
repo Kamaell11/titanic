@@ -32,6 +32,8 @@ test:
   before_script:
     - python -m venv .venv
     - source .venv/bin/activate
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
   script:
     - pytest tests/
 
@@ -46,5 +48,7 @@ deploy:
   before_script:
     - python -m venv .venv
     - source .venv/bin/activate
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
   script:
     - streamlit run app.py
