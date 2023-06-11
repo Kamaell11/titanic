@@ -1,16 +1,18 @@
-# The Docker image that will be used to build your app
-image: python
-# Functions that should be executed before the build script is run
+image: python:3.8
+
+stages:
+  - build
+  - deploy
+
 before_script:
-  - pip install -r requirements.txt
-pages:
+  - apt-get update && apt-get -y install git
+
+build:
+  stage: build
   script:
-    - streamlit run app.py
-  artifacts:
-    paths:
-      # The folder that contains the files to be exposed at the Page URL
-      - public
-  rules:
-    # This ensures that only pushes to the default branch will trigger
-    # a pages deploy
-    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+    - pip install -r requirements.txt
+
+deploy:
+  stage: deploy
+  script:
+    - streamlit run app.py --server.enableCORS false --server.port $PORT
