@@ -11,6 +11,7 @@ build:
   stage: build
   script:
     - pip install -r requirements.txt
+    - pip install streamlit
 
 deploy:
   stage: deploy
