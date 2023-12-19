@@ -13,7 +13,16 @@ build:
     - pip install -r requirements.txt
     - pip install streamlit
 
-deploy:
+pages:
   stage: deploy
   script:
-    - streamlit run app.py --server.enableCORS false --server.port $PORT
+    - mkdir .public
+    - streamlit run app.py --server.enableCORS false --server.port $CI_SERVER_PORT &
+    - sleep 5 # Czekamy na uruchomienie Streamlit
+    - cp -r * .public
+    - mv .public public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
