@@ -15,9 +15,9 @@ build:
 pages:
   stage: deploy
   script:
+    - pip install streamlit 
     - streamlit run app.py --server.enableCORS false --server.port $CI_SERVER_PORT
   rules:
     - exists:
-        - .streamlit
-    - exists:
         - app.py
+
