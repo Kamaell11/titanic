@@ -15,14 +15,9 @@ build:
 pages:
   stage: deploy
   script:
-    - mkdir .public
-    - streamlit run app.py --server.enableCORS false --server.port 8080 &
-    - sleep 5
-    - cp -r * .public
-    - mv .public public
-  artifacts:
-    paths:
-      - public
-  only:
-    - master
-
+    - streamlit run app.py --server.enableCORS false --server.port $CI_SERVER_PORT
+  rules:
+    - exists:
+        - .streamlit
+    - exists:
+        - app.py
