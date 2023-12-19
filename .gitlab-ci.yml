@@ -12,14 +12,12 @@ build:
   script:
     - pip install -r requirements.txt
 
-deploy:
+pages:
   stage: deploy
   script:
     - pip install streamlit 
-    - streamlit run app.py --server.port $CI_SERVER_PORT
+    - streamlit run app.py --server.enableCORS false --server.port $CI_SERVER_PORT
   rules:
     - exists:
         - app.py
-  only:
-    - master
 
