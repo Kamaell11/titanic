@@ -4,7 +4,7 @@
 
 ## Getting started
 
-this is a portoflio project made by Kamil SKowronek [fullstack python developer].
+this is a portoflio project made by Kamil Skowronek [fullstack python developer].
 This project can be used to see the data and analisys from titanic dataset, feel free to use it!
 
 
@@ -48,6 +48,11 @@ Create your enviroment via Conda or Pip
 ## Usage
 - Streamlit:
     - start server ``` streamlit run app.py ```
+
+- Docker:
+    - build Docker image ``` docker build -t titanic:latest . ```
+    - run Docker image ``` docker run -p 8080:8080 titanic:latest ```
+
 
 
 ## Contact
